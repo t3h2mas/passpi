@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/t3h2mas/passpi/hash"
@@ -20,7 +22,42 @@ func (s *server) handleHash() http.HandlerFunc {
 			fmt.Fprintf(w, "Not allowed")
 			return
 		}
-		fmt.Fprintf(w, "Hello, World!")
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Bad request")
+			return
+		}
+
+		// body must not be empty
+		if len(body) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Bad request")
+			return
+		}
+
+		pieces := strings.Split(string(body), "=")
+		if len(pieces) != 2 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Bad request")
+			return
+		}
+
+		if pieces[0] != "password" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Bad request")
+			return
+		}
+
+		if len(pieces[1]) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Bad request")
+			return
+		}
+
+		// return hash
+		fmt.Fprintf(w, "%s", s.hash.Calculate(pieces[1]))
 	}
 }
 
