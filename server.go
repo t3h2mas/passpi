@@ -15,6 +15,11 @@ type server struct {
 
 func (s *server) handleHash() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(w, "Not allowed")
+			return
+		}
 		fmt.Fprintf(w, "Hello, World!")
 	}
 }
