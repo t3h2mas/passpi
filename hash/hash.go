@@ -6,7 +6,7 @@ import (
 )
 
 type HashService interface {
-	Calculate(str string) (string, error)
+	Calculate(str string) string
 }
 
 type Hash struct{}
