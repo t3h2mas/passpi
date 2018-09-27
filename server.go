@@ -14,6 +14,7 @@ import (
 type server struct {
 	hash   hash.HashService
 	router *http.ServeMux
+	stop   chan bool
 }
 
 func httpErr(w http.ResponseWriter, status int) {
@@ -62,6 +63,13 @@ func (s *server) handleHash() http.HandlerFunc {
 
 		// return hash
 		fmt.Fprintf(w, "%s", s.hash.Calculate(pieces[1]))
+	}
+}
+
+func (s *server) handleShutdown() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Shutdown triggered")
+		s.stop <- true
 	}
 }
 
