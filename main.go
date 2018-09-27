@@ -23,6 +23,10 @@ func main() {
 		hash:   hash,
 		router: http.NewServeMux(),
 		stop:   stop,
+		stats: &Stats{
+			requestCount: 0,
+			totalTime:    0,
+		},
 	}
 
 	server.routes(routeDelay)

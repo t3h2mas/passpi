@@ -15,6 +15,7 @@ type server struct {
 	hash   hash.HashService
 	router *http.ServeMux
 	stop   chan bool
+	stats  *Stats
 }
 
 func httpErr(w http.ResponseWriter, status int) {
@@ -23,6 +24,11 @@ func httpErr(w http.ResponseWriter, status int) {
 
 func (s *server) handleHash() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		defer func(start time.Time) {
+			s.stats.AddPoint(time.Since(start))
+		}(time.Now())
+
 		if r.Method != http.MethodPost {
 			httpErr(w, http.StatusMethodNotAllowed)
 			return
@@ -63,6 +69,7 @@ func (s *server) handleHash() http.HandlerFunc {
 
 		// return hash
 		fmt.Fprintf(w, "%s", s.hash.Calculate(pieces[1]))
+		return
 	}
 }
 
@@ -70,6 +77,18 @@ func (s *server) handleShutdown() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Shutdown triggered")
 		s.stop <- true
+	}
+}
+
+func (s *server) handleStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		data, err := s.stats.Json()
+		if err != nil {
+			fmt.Fprintf(w, "{\"error\": \"%s\"}", err.Error())
+			return
+		}
+		w.Write(data)
 	}
 }
 
