@@ -2,7 +2,8 @@ package main
 
 import "time"
 
-func (s *server) routes() {
-	s.router.HandleFunc("/hash", s.handleHash())
-	s.router.HandleFunc("/delay", s.delayMiddleware(5*time.Second)(s.handleHash()))
+func (s *server) routes(delay time.Duration) {
+	s.router.HandleFunc("/hashQuick", s.handleHash())
+	s.router.HandleFunc("/hash", s.delayMiddleware(delay)(s.handleHash()))
+	s.router.HandleFunc("/shutdown", s.handleShutdown())
 }
