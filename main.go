@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/t3h2mas/passpi/hash"
@@ -16,5 +17,8 @@ func main() {
 
 	server.routes()
 
-	http.ListenAndServe(":8080", server.logMiddleware(server.router))
+	err := http.ListenAndServe(":8080", server.logMiddleware(server.router))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
