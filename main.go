@@ -16,5 +16,5 @@ func main() {
 
 	server.routes()
 
-	http.ListenAndServe(":8080", server.router)
+	http.ListenAndServe(":8080", server.logMiddleware(server.router))
 }
