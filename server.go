@@ -24,11 +24,6 @@ func httpErr(w http.ResponseWriter, status int) {
 
 func (s *server) handleHash() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		defer func(start time.Time) {
-			s.stats.AddPoint(time.Since(start))
-		}(time.Now())
-
 		if r.Method != http.MethodPost {
 			httpErr(w, http.StatusMethodNotAllowed)
 			return
@@ -83,12 +78,22 @@ func (s *server) handleShutdown() http.HandlerFunc {
 func (s *server) handleStats() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		data, err := s.stats.Json()
+		data, err := s.stats.JSON()
 		if err != nil {
 			fmt.Fprintf(w, "{\"error\": \"%s\"}", err.Error())
 			return
 		}
 		w.Write(data)
+	}
+}
+
+func (s *server) withStats(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+		defer func(start time.Time) {
+			s.stats.AddPoint(time.Since(start))
+		}(now)
+		next.ServeHTTP(w, r)
 	}
 }
 
