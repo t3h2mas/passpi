@@ -1,3 +1,11 @@
+// passpi provides a simple password hashing API
+//
+// Run it:
+//   ./passpi
+// Or:
+//   ADDR=':1337' ./passpi
+// To change the listening address
+
 package main
 
 import (
