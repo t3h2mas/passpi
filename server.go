@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/t3h2mas/passpi/hash"
@@ -34,44 +32,21 @@ func (s *server) handleHash() http.HandlerFunc {
 			return
 		}
 
-		body, err := ioutil.ReadAll(r.Body)
+		err := r.ParseForm()
 		if err != nil {
 			log.Printf("Failed to parse body, error: %s\n", err.Error())
 			httpErr(w, http.StatusBadRequest)
 			return
 		}
 
-		// body must not be empty
-		if len(body) == 0 {
-			log.Println("Body empty")
+		password := r.FormValue("password")
+		if len(password) == 0 {
+			log.Println("Password field empty")
 			httpErr(w, http.StatusBadRequest)
 			return
 		}
 
-		// body must consist of "[KEY]=[VALUE]"
-		pieces := strings.Split(string(body), "=")
-		if len(pieces) != 2 {
-			log.Printf("Bad body format:\n%s\n", string(body))
-			httpErr(w, http.StatusBadRequest)
-			return
-		}
-
-		// key must be 'password'
-		if pieces[0] != "password" {
-			log.Printf("Bad body format:\n%s\n", string(body))
-			httpErr(w, http.StatusBadRequest)
-			return
-		}
-
-		// value must not be empty
-		if len(pieces[1]) == 0 {
-			log.Printf("Password field empty:\n%s\n", string(body))
-			httpErr(w, http.StatusBadRequest)
-			return
-		}
-
-		// body parsed; return hash
-		fmt.Fprintf(w, "%s", s.hash.Calculate(pieces[1]))
+		fmt.Fprintf(w, "%s", s.hash.Calculate(password))
 		return
 	}
 }
