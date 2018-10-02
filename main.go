@@ -4,15 +4,23 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/t3h2mas/passpi/hash"
 	"github.com/t3h2mas/passpi/stats"
 )
 
+func getEnvOr(key, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	return fallback
+}
+
 func main() {
 	// "global" configuration
-	Addr := ":8080"
+	Addr := getEnvOr("ADDR", ":8080")
 	shutdownTimeout := time.Second * 10
 	routeDelay := time.Second * 5
 
