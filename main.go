@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/t3h2mas/passpi/hash"
+	"github.com/t3h2mas/passpi/stats"
 )
 
 func main() {
@@ -26,9 +27,9 @@ func main() {
 		hash:   hash,
 		router: http.NewServeMux(),
 		stop:   stop,
-		stats: &Stats{
-			requestCount: 0,
-			totalTime:    0,
+		stats: &stats.Memory{
+			RequestCount: 0,
+			TotalTime:    0,
 		},
 	}
 

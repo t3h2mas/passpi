@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/t3h2mas/passpi/hash"
+	"github.com/t3h2mas/passpi/stats"
 )
 
 type server struct {
 	hash   hash.HashService
 	router *http.ServeMux
 	stop   chan bool
-	stats  *Stats
+	stats  stats.Service
 }
 
 func httpErr(w http.ResponseWriter, status int) {
