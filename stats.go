@@ -38,6 +38,7 @@ func (s *Stats) JSON() ([]byte, error) {
 
 // AddPoint increments the running metrics
 func (s *Stats) AddPoint(t time.Duration) {
+	// use atomic pkg to prevent racing
 	atomic.AddInt64(&s.requestCount, 1)
 	atomic.AddInt64(&s.totalTime, int64(t))
 }

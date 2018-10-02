@@ -15,10 +15,13 @@ func main() {
 	shutdownTimeout := time.Second * 10
 	routeDelay := time.Second * 5
 
+	// initialize vars
 	hash := &hash.HashSha512{}
 
+	// used for gracefull shutdown
 	stop := make(chan bool, 1)
 
+	// main server struct, holds router and dependencies
 	server := &server{
 		hash:   hash,
 		router: http.NewServeMux(),
@@ -29,8 +32,10 @@ func main() {
 		},
 	}
 
+	// register routes
 	server.routes(routeDelay)
 
+	// implement http.Server so we can use `s` for shutdown
 	s := &http.Server{
 		Addr:    Addr,
 		Handler: server.logMiddleware(server.router),
@@ -43,6 +48,7 @@ func main() {
 		}
 	}()
 
+	// blocks on stop channel until shutdown endpoint called
 	<-stop
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()

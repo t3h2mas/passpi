@@ -22,6 +22,10 @@ func httpErr(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
+/*
+ * endpoint handlers
+ */
+
 func (s *server) handleHash() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -43,6 +47,7 @@ func (s *server) handleHash() http.HandlerFunc {
 			return
 		}
 
+		// body must consist of "[KEY]=[VALUE]"
 		pieces := strings.Split(string(body), "=")
 		if len(pieces) != 2 {
 			log.Printf("Bad body format:\n%s\n", string(body))
@@ -50,19 +55,21 @@ func (s *server) handleHash() http.HandlerFunc {
 			return
 		}
 
+		// key must be 'password'
 		if pieces[0] != "password" {
 			log.Printf("Bad body format:\n%s\n", string(body))
 			httpErr(w, http.StatusBadRequest)
 			return
 		}
 
+		// value must not be empty
 		if len(pieces[1]) == 0 {
 			log.Printf("Password field empty:\n%s\n", string(body))
 			httpErr(w, http.StatusBadRequest)
 			return
 		}
 
-		// return hash
+		// body parsed; return hash
 		fmt.Fprintf(w, "%s", s.hash.Calculate(pieces[1]))
 		return
 	}
@@ -87,7 +94,12 @@ func (s *server) handleStats() http.HandlerFunc {
 	}
 }
 
-func (s *server) withStats(next http.HandlerFunc) http.HandlerFunc {
+/*
+ * middleware
+ */
+
+// adds metrics for wrapped handlers
+func (s *server) statsMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		defer func(start time.Time) {
@@ -97,6 +109,7 @@ func (s *server) withStats(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// returns middleware to add delay 'duration'
 func (s *server) delayMiddleware(duration time.Duration) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
