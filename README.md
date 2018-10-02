@@ -1,6 +1,9 @@
 # passpi
 > the password hashing API of your _dreams_
 
+[![GoDoc](https://godoc.org/github.com/t3h2mas/passpi?status.svg)](https://godoc.org/github.com/t3h2mas/passpi)
+---
+
 ## usage
 download the project
 
